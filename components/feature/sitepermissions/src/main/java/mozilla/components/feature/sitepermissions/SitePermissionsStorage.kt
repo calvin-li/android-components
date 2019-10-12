@@ -86,7 +86,7 @@ class SitePermissionsStorage(
         val sitePermissions = all()
         return Permission.values().map { permission ->
             permission to sitePermissions.filter {
-                it.permissions[permission.id] == ALLOWED
+                it.permissions[permission] == ALLOWED
         }}.toMap()
     }
 
@@ -121,6 +121,6 @@ class SitePermissionsStorage(
     }
 
     enum class Permission(val id: Int) {
-        MICROPHONE(0), BLUETOOTH(1), CAMERA(2), LOCAL_STORAGE(3), NOTIFICATION(4), LOCATION(5)
+        MICROPHONE(0), BLUETOOTH(1), CAMERA(2), LOCAL_STORAGE(3), NOTIFICATION(4), LOCATION(5);
     }
 }

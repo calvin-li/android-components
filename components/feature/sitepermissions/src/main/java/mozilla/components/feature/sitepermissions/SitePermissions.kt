@@ -21,19 +21,9 @@ import mozilla.components.feature.sitepermissions.db.StatusConverter
  */
 data class SitePermissions(
     val origin: String,
-    val permissions: List<Status> = Permission.values().map { NO_DECISION },
+    val permissions: Map<Permission, Status> = Permission.values().map { it to NO_DECISION }.toMap(),
     val savedAt: Long
 ) : Parcelable {
-
-    constructor(
-            origin: String,
-            permissionsMap: Map<Permission, Status>,
-            savedAt: Long) : this(
-            origin,
-            Permission.values().map { permission ->
-                permissionsMap.getOrElse(permission) { NO_DECISION }
-            },
-            savedAt)
 
     // TODO: Remove, and replace all usages
     constructor(
@@ -46,28 +36,23 @@ data class SitePermissions(
             localStorage: Status = NO_DECISION,
             savedAt: Long) : this(
             origin,
-            Permission.values().map {
-                @Suppress("REDUNDANT_ELSE_IN_WHEN",
-                        "Adding default behavior for any new permission types")
-                when(it){
-                    LOCATION -> location
-                    NOTIFICATION -> notification
-                    MICROPHONE -> microphone
-                    CAMERA -> camera
-                    BLUETOOTH -> bluetooth
-                    LOCAL_STORAGE -> localStorage
-                    else -> NO_DECISION
-                }
-            },
+            mapOf(
+                LOCATION to location,
+                NOTIFICATION to notification,
+                MICROPHONE to microphone,
+                CAMERA to camera,
+                BLUETOOTH to bluetooth,
+                LOCAL_STORAGE to localStorage),
             savedAt)
 
     constructor(parcel: Parcel) :
         this(
             requireNotNull(parcel.readString()),
-                requireNotNull(
-                    parcel.createIntArray()?.map{
-                        requireNotNull(converter.toStatus(it))
-                    }),
+            requireNotNull(parcel.createIntArray()).zip(requireNotNull(parcel.createIntArray()))
+                .map {(permission, status) ->
+                    requireNotNull(Permission.values().find { it.id == permission }) to
+                        requireNotNull(converter.toStatus(status))}
+                .toMap(),
             parcel.readLong()
         )
 
@@ -88,7 +73,9 @@ data class SitePermissions(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(origin)
-        parcel.writeIntArray(permissions.map { converter.toInt(it) }.toIntArray())
+        val (permissionList, statusList) = permissions.toList().unzip()
+        parcel.writeIntArray(permissionList.map { it.id }.toIntArray())
+        parcel.writeIntArray(statusList.map { converter.toInt(it) }.toIntArray())
         parcel.writeLong(savedAt)
     }
 
@@ -109,19 +96,19 @@ data class SitePermissions(
     }
 
     internal operator fun get(permission: Permission): Status {
-        return permissions[permission.id]
+        return permissions.getOrElse(permission) {NO_DECISION}
     }
 
     val bluetooth: Status
-        get() = permissions[BLUETOOTH.id]
+        get() = this[BLUETOOTH]
     val camera: Status
-        get() = permissions[CAMERA.id]
+        get() = this[CAMERA]
     val microphone: Status
-        get() = permissions[MICROPHONE.id]
+        get() = this[MICROPHONE]
     val location: Status
-        get() = permissions[LOCATION.id]
+        get() = this[LOCATION]
     val localStorage: Status
-        get() = permissions[LOCAL_STORAGE.id]
+        get() = this[LOCAL_STORAGE]
     val notification: Status
-        get() = permissions[NOTIFICATION.id]
+        get() = this[NOTIFICATION]
 }
