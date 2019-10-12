@@ -150,7 +150,7 @@ class SitePermissionsStorage(
         }
     }
 
-    enum class Permission {
-        MICROPHONE, BLUETOOTH, CAMERA, LOCAL_STORAGE, NOTIFICATION, LOCATION
+    enum class Permission(val id: Int) {
+        MICROPHONE(0), BLUETOOTH(1), CAMERA(2), LOCAL_STORAGE(3), NOTIFICATION(4), LOCATION(5)
     }
 }

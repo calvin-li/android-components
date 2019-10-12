@@ -34,6 +34,12 @@ import mozilla.components.concept.engine.permission.PermissionRequest
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.BLOCKED
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature.DialogConfig
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.base.feature.PermissionsFeature
@@ -278,7 +284,7 @@ class SitePermissionsFeature(
         return permissions.any { permission ->
             when (permission) {
                 is ContentGeoLocation -> {
-                    permissionFromStore.location.doNotAskAgain()
+                    permissionFromStore[LOCATION].doNotAskAgain()
                 }
                 is ContentNotification -> {
                     permissionFromStore.notification.doNotAskAgain()
@@ -542,7 +548,7 @@ private fun isPermissionGranted(
 ): Boolean {
     return when (permission) {
         is ContentGeoLocation -> {
-            permissionFromStorage.location.isAllowed()
+            permissionFromStorage[].isAllowed()
         }
         is ContentNotification -> {
             permissionFromStorage.notification.isAllowed()

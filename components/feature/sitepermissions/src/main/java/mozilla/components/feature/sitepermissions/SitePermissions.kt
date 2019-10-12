@@ -46,12 +46,10 @@ data class SitePermissions(
     constructor(parcel: Parcel) :
         this(
             requireNotNull(parcel.readString()),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
+                requireNotNull(
+                    parcel.createIntArray()?.map{
+                        requireNotNull(converter.toStatus(it))
+                    }),
             parcel.readLong()
         )
 
@@ -72,7 +70,7 @@ data class SitePermissions(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(origin)
-        permissions.forEach { parcel.writeInt(converter.toInt(it)) }
+        parcel.writeIntArray(permissions.map { converter.toInt(it) }.toIntArray())
         parcel.writeLong(savedAt)
     }
 
