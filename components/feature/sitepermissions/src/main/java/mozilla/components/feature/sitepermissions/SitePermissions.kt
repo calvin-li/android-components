@@ -6,7 +6,8 @@ package mozilla.components.feature.sitepermissions
 
 import android.os.Parcel
 import android.os.Parcelable
-import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
+import mozilla.components.feature.sitepermissions.SitePermissions.Status.*
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
 import mozilla.components.feature.sitepermissions.db.StatusConverter
 
 /**
@@ -14,14 +15,29 @@ import mozilla.components.feature.sitepermissions.db.StatusConverter
  */
 data class SitePermissions(
     val origin: String,
-    val location: Status = NO_DECISION,
-    val notification: Status = NO_DECISION,
-    val microphone: Status = NO_DECISION,
-    val camera: Status = NO_DECISION,
-    val bluetooth: Status = NO_DECISION,
-    val localStorage: Status = NO_DECISION,
+    val permissions: Map<Permission, Status>,
     val savedAt: Long
 ) : Parcelable {
+
+    constructor(
+            origin: String,
+            location: Status = NO_DECISION,
+            notification: Status = NO_DECISION,
+            microphone: Status = NO_DECISION,
+            camera: Status = NO_DECISION,
+            bluetooth: Status = NO_DECISION,
+            localStorage: Status = NO_DECISION,
+            savedAt: Long) : this(
+            origin,
+            mapOf(
+                    Permission.LOCATION to location,
+                    Permission.NOTIFICATION to notification,
+                    Permission.MICROPHONE to microphone,
+                    Permission.CAMERA to camera,
+                    Permission.BLUETOOTH to bluetooth,
+                    Permission.LOCAL_STORAGE to localStorage
+            ),
+            savedAt)
 
     constructor(parcel: Parcel) :
         this(
@@ -52,12 +68,7 @@ data class SitePermissions(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(origin)
-        parcel.writeInt(converter.toInt(location))
-        parcel.writeInt(converter.toInt(notification))
-        parcel.writeInt(converter.toInt(microphone))
-        parcel.writeInt(converter.toInt(camera))
-        parcel.writeInt(converter.toInt(bluetooth))
-        parcel.writeInt(converter.toInt(localStorage))
+        permissions.values.forEach { parcel.writeInt(converter.toInt(it)) }
         parcel.writeLong(savedAt)
     }
 
@@ -75,5 +86,9 @@ data class SitePermissions(
         }
 
         private val converter = StatusConverter()
+    }
+
+    private operator fun get(permission: Permission): Status? {
+        return permissions[permission]
     }
 }
