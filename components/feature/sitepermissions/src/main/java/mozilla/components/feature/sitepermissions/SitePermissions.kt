@@ -18,28 +18,13 @@ data class SitePermissions(
     val permissions: List<Status> = Permission.values().map { NO_DECISION },
     val savedAt: Long
 ) : Parcelable {
-
-    @Deprecated("Please use primary constructor")
     constructor(
             origin: String,
-            location: Status = NO_DECISION,
-            notification: Status = NO_DECISION,
-            microphone: Status = NO_DECISION,
-            camera: Status = NO_DECISION,
-            bluetooth: Status = NO_DECISION,
-            localStorage: Status = NO_DECISION,
+            permissionsMap: Map<Permission, Status>,
             savedAt: Long) : this(
             origin,
-            Permission.values().map {
-                when(it){
-                    Permission.LOCATION -> location
-                    Permission.NOTIFICATION -> notification
-                    Permission.MICROPHONE -> microphone
-                    Permission.CAMERA -> camera
-                    Permission.BLUETOOTH -> bluetooth
-                    Permission.LOCAL_STORAGE -> localStorage
-                    else -> NO_DECISION // default behavior for any new permission types
-                }
+            Permission.values().map { permission ->
+                permissionsMap.getOrElse(permission) { NO_DECISION }
             },
             savedAt)
 
