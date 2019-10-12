@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import mozilla.components.feature.sitepermissions.SitePermissions
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.BLOCKED
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -71,7 +72,14 @@ class SitePermissionsDaoTest {
 
         assertEquals(BLOCKED, siteFromDb.camera)
 
-        dao.update(siteFromDb.copy(camera = ALLOWED).toSitePermissionsEntity())
+        dao.update(siteFromDb.copy(permissions =
+        siteFromDb.permissions.mapIndexed{index, oldStatus ->
+            if (index == SitePermissionsStorage.Permission.CAMERA.id){
+                ALLOWED
+            } else {
+                oldStatus
+            }
+        }).toSitePermissionsEntity())
 
         siteFromDb = dao.getSitePermissionsBy(origin)!!.toSitePermission()
 

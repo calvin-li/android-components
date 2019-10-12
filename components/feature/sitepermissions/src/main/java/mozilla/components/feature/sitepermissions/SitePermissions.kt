@@ -8,6 +8,12 @@ import android.os.Parcel
 import android.os.Parcelable
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
 import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
 import mozilla.components.feature.sitepermissions.db.StatusConverter
 
 /**
@@ -18,6 +24,7 @@ data class SitePermissions(
     val permissions: List<Status> = Permission.values().map { NO_DECISION },
     val savedAt: Long
 ) : Parcelable {
+
     constructor(
             origin: String,
             permissionsMap: Map<Permission, Status>,
@@ -25,6 +32,32 @@ data class SitePermissions(
             origin,
             Permission.values().map { permission ->
                 permissionsMap.getOrElse(permission) { NO_DECISION }
+            },
+            savedAt)
+
+    // TODO: Remove, and replace all usages
+    constructor(
+            origin: String,
+            location: Status = NO_DECISION,
+            notification: Status = NO_DECISION,
+            microphone: Status = NO_DECISION,
+            camera: Status = NO_DECISION,
+            bluetooth: Status = NO_DECISION,
+            localStorage: Status = NO_DECISION,
+            savedAt: Long) : this(
+            origin,
+            Permission.values().map {
+                @Suppress("REDUNDANT_ELSE_IN_WHEN",
+                        "Adding default behavior for any new permission types")
+                when(it){
+                    LOCATION -> location
+                    NOTIFICATION -> notification
+                    MICROPHONE -> microphone
+                    CAMERA -> camera
+                    BLUETOOTH -> bluetooth
+                    LOCAL_STORAGE -> localStorage
+                    else -> NO_DECISION
+                }
             },
             savedAt)
 
@@ -78,4 +111,17 @@ data class SitePermissions(
     internal operator fun get(permission: Permission): Status {
         return permissions[permission.id]
     }
+
+    val bluetooth: Status
+        get() = permissions[BLUETOOTH.id]
+    val camera: Status
+        get() = permissions[CAMERA.id]
+    val microphone: Status
+        get() = permissions[MICROPHONE.id]
+    val location: Status
+        get() = permissions[LOCATION.id]
+    val localStorage: Status
+        get() = permissions[LOCAL_STORAGE.id]
+    val notification: Status
+        get() = permissions[NOTIFICATION.id]
 }
