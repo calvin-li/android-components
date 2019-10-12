@@ -6,7 +6,7 @@ package mozilla.components.feature.sitepermissions
 
 import android.os.Parcel
 import android.os.Parcelable
-import mozilla.components.feature.sitepermissions.SitePermissions.Status.*
+import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
 import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
 import mozilla.components.feature.sitepermissions.db.StatusConverter
 
@@ -15,10 +15,11 @@ import mozilla.components.feature.sitepermissions.db.StatusConverter
  */
 data class SitePermissions(
     val origin: String,
-    val permissions: Map<Permission, Status>,
+    val permissions: List<Status> = Permission.values().map { NO_DECISION },
     val savedAt: Long
 ) : Parcelable {
 
+    @Deprecated("Please use primary constructor")
     constructor(
             origin: String,
             location: Status = NO_DECISION,
@@ -29,14 +30,17 @@ data class SitePermissions(
             localStorage: Status = NO_DECISION,
             savedAt: Long) : this(
             origin,
-            mapOf(
-                    Permission.LOCATION to location,
-                    Permission.NOTIFICATION to notification,
-                    Permission.MICROPHONE to microphone,
-                    Permission.CAMERA to camera,
-                    Permission.BLUETOOTH to bluetooth,
-                    Permission.LOCAL_STORAGE to localStorage
-            ),
+            Permission.values().map {
+                when(it){
+                    Permission.LOCATION -> location
+                    Permission.NOTIFICATION -> notification
+                    Permission.MICROPHONE -> microphone
+                    Permission.CAMERA -> camera
+                    Permission.BLUETOOTH -> bluetooth
+                    Permission.LOCAL_STORAGE -> localStorage
+                    else -> NO_DECISION // default behavior for any new permission types
+                }
+            },
             savedAt)
 
     constructor(parcel: Parcel) :
@@ -68,7 +72,7 @@ data class SitePermissions(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(origin)
-        permissions.values.forEach { parcel.writeInt(converter.toInt(it)) }
+        permissions.forEach { parcel.writeInt(converter.toInt(it)) }
         parcel.writeLong(savedAt)
     }
 
@@ -88,7 +92,7 @@ data class SitePermissions(
         private val converter = StatusConverter()
     }
 
-    private operator fun get(permission: Permission): Status? {
-        return permissions[permission]
+    internal operator fun get(permission: Permission): Status {
+        return permissions[permission.id]
     }
 }
