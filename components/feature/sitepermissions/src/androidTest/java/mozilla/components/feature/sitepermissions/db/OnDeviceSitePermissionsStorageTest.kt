@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import mozilla.components.feature.sitepermissions.SitePermissions
 import mozilla.components.feature.sitepermissions.SitePermissionsStorage
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -54,14 +55,14 @@ class OnDeviceSitePermissionsStorageTest {
         val origin = "https://www.mozilla.org".toUri().host!!
         val sitePermissions = SitePermissions(
             origin = origin,
-            camera = SitePermissions.Status.BLOCKED,
+            permissionsMap = mapOf(CAMERA to SitePermissions.Status.BLOCKED),
             savedAt = System.currentTimeMillis()
         )
         storage.save(sitePermissions)
         val sitePermissionsFromStorage = storage.findSitePermissionsBy(origin)!!
 
         assertEquals(origin, sitePermissionsFromStorage.origin)
-        assertEquals(SitePermissions.Status.BLOCKED, sitePermissionsFromStorage.camera)
+        assertEquals(SitePermissions.Status.BLOCKED, sitePermissionsFromStorage[CAMERA])
     }
 
     @Test

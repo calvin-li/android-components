@@ -8,6 +8,7 @@ import mozilla.components.feature.sitepermissions.SitePermissions
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.BLOCKED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -30,12 +31,12 @@ class SitePermissionEntityTest {
 
         with(dbEntity) {
             assertEquals(origin, domainClass.origin)
-            assertEquals(localStorage, domainClass.localStorage)
-            assertEquals(location, domainClass.location)
-            assertEquals(notification, domainClass.notification)
-            assertEquals(microphone, domainClass.microphone)
-            assertEquals(camera, domainClass.camera)
-            assertEquals(bluetooth, domainClass.bluetooth)
+            assertEquals(localStorage, domainClass[Permission.LOCAL_STORAGE])
+            assertEquals(location, domainClass[Permission.LOCATION])
+            assertEquals(notification, domainClass[Permission.NOTIFICATION])
+            assertEquals(microphone, domainClass[Permission.MICROPHONE])
+            assertEquals(camera, domainClass[Permission.CAMERA])
+            assertEquals(bluetooth, domainClass[Permission.BLUETOOTH])
             assertEquals(savedAt, domainClass.savedAt)
         }
     }
@@ -44,12 +45,13 @@ class SitePermissionEntityTest {
     fun `convert from domain class to db entity`() {
         val domainClass = SitePermissions(
             origin = "mozilla.dev",
-            localStorage = ALLOWED,
-            location = BLOCKED,
-            notification = NO_DECISION,
-            microphone = NO_DECISION,
-            camera = NO_DECISION,
-            bluetooth = ALLOWED,
+                permissionsMap = mapOf(
+            Permission.LOCAL_STORAGE to ALLOWED,
+            Permission.LOCATION to BLOCKED,
+            Permission.NOTIFICATION to NO_DECISION,
+            Permission.MICROPHONE to NO_DECISION,
+            Permission.CAMERA to NO_DECISION,
+            Permission.BLUETOOTH to ALLOWED),
             savedAt = 0
         )
 
@@ -57,12 +59,12 @@ class SitePermissionEntityTest {
 
         with(dbEntity) {
             assertEquals(origin, domainClass.origin)
-            assertEquals(localStorage, domainClass.localStorage)
-            assertEquals(location, domainClass.location)
-            assertEquals(notification, domainClass.notification)
-            assertEquals(microphone, domainClass.microphone)
-            assertEquals(camera, domainClass.camera)
-            assertEquals(bluetooth, domainClass.bluetooth)
+            assertEquals(localStorage, domainClass[Permission.LOCAL_STORAGE])
+            assertEquals(location, domainClass[Permission.LOCATION])
+            assertEquals(notification, domainClass[Permission.NOTIFICATION])
+            assertEquals(microphone, domainClass[Permission.MICROPHONE])
+            assertEquals(camera, domainClass[Permission.CAMERA])
+            assertEquals(bluetooth, domainClass[Permission.BLUETOOTH])
             assertEquals(savedAt, domainClass.savedAt)
         }
     }

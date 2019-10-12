@@ -122,12 +122,13 @@ class SitePermissionsStorageTest {
     private fun createNewSitePermission(): SitePermissions {
         return SitePermissions(
             origin = "mozilla.dev",
-            localStorage = ALLOWED,
-            location = BLOCKED,
-            notification = NO_DECISION,
-            microphone = NO_DECISION,
-            camera = NO_DECISION,
-            bluetooth = ALLOWED,
+            permissionsMap = mapOf(
+            LOCAL_STORAGE to ALLOWED,
+            LOCATION to BLOCKED,
+            NOTIFICATION to NO_DECISION,
+            MICROPHONE to NO_DECISION,
+            CAMERA to NO_DECISION,
+            BLUETOOTH to ALLOWED),
             savedAt = 0
         )
     }
