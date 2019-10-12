@@ -7,6 +7,13 @@ package mozilla.components.feature.sitepermissions
 import android.os.Parcel
 import android.os.Parcelable
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
 import mozilla.components.feature.sitepermissions.db.StatusConverter
 
 /**
@@ -14,24 +21,38 @@ import mozilla.components.feature.sitepermissions.db.StatusConverter
  */
 data class SitePermissions(
     val origin: String,
-    val location: Status = NO_DECISION,
-    val notification: Status = NO_DECISION,
-    val microphone: Status = NO_DECISION,
-    val camera: Status = NO_DECISION,
-    val bluetooth: Status = NO_DECISION,
-    val localStorage: Status = NO_DECISION,
+    val permissions: Map<Permission, Status> = emptyMap(),
     val savedAt: Long
 ) : Parcelable {
+
+    // TODO: Remove, and replace all usages
+    constructor(
+            origin: String,
+            location: Status = NO_DECISION,
+            notification: Status = NO_DECISION,
+            microphone: Status = NO_DECISION,
+            camera: Status = NO_DECISION,
+            bluetooth: Status = NO_DECISION,
+            localStorage: Status = NO_DECISION,
+            savedAt: Long) : this(
+            origin,
+            mapOf(
+                LOCATION to location,
+                NOTIFICATION to notification,
+                MICROPHONE to microphone,
+                CAMERA to camera,
+                BLUETOOTH to bluetooth,
+                LOCAL_STORAGE to localStorage),
+            savedAt)
 
     constructor(parcel: Parcel) :
         this(
             requireNotNull(parcel.readString()),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
-            requireNotNull(converter.toStatus(parcel.readInt())),
+            requireNotNull(parcel.createIntArray()).zip(requireNotNull(parcel.createIntArray()))
+                .map {(permission, status) ->
+                    requireNotNull(Permission.values().find { it.id == permission }) to
+                    requireNotNull(converter.toStatus(status))
+                }.toMap(),
             parcel.readLong()
         )
 
@@ -52,12 +73,9 @@ data class SitePermissions(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(origin)
-        parcel.writeInt(converter.toInt(location))
-        parcel.writeInt(converter.toInt(notification))
-        parcel.writeInt(converter.toInt(microphone))
-        parcel.writeInt(converter.toInt(camera))
-        parcel.writeInt(converter.toInt(bluetooth))
-        parcel.writeInt(converter.toInt(localStorage))
+        val (permissionList, statusList) = permissions.toList().unzip()
+        parcel.writeIntArray(permissionList.map { it.id }.toIntArray())
+        parcel.writeIntArray(statusList.map { converter.toInt(it) }.toIntArray())
         parcel.writeLong(savedAt)
     }
 
@@ -76,4 +94,21 @@ data class SitePermissions(
 
         private val converter = StatusConverter()
     }
+
+    internal operator fun get(permission: Permission): Status {
+        return permissions.getOrElse(permission) {NO_DECISION}
+    }
+
+    val bluetooth: Status
+        get() = this[BLUETOOTH]
+    val camera: Status
+        get() = this[CAMERA]
+    val microphone: Status
+        get() = this[MICROPHONE]
+    val location: Status
+        get() = this[LOCATION]
+    val localStorage: Status
+        get() = this[LOCAL_STORAGE]
+    val notification: Status
+        get() = this[NOTIFICATION]
 }

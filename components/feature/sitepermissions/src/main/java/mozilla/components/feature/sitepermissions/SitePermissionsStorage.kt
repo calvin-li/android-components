@@ -7,14 +7,7 @@ package mozilla.components.feature.sitepermissions
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.paging.DataSource
-import mozilla.components.feature.sitepermissions.SitePermissions.Status
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
 import mozilla.components.feature.sitepermissions.db.SitePermissionsDatabase
 import mozilla.components.feature.sitepermissions.db.toSitePermissionsEntity
 
@@ -91,19 +84,10 @@ class SitePermissionsStorage(
      */
     fun findAllSitePermissionsGroupedByPermission(): Map<Permission, List<SitePermissions>> {
         val sitePermissions = all()
-        val map = mutableMapOf<Permission, MutableList<SitePermissions>>()
-
-        sitePermissions.forEach { permission ->
-            with(permission) {
-                map.putIfAllowed(BLUETOOTH, bluetooth, permission)
-                map.putIfAllowed(MICROPHONE, microphone, permission)
-                map.putIfAllowed(CAMERA, camera, permission)
-                map.putIfAllowed(LOCAL_STORAGE, localStorage, permission)
-                map.putIfAllowed(NOTIFICATION, notification, permission)
-                map.putIfAllowed(LOCATION, location, permission)
-            }
-        }
-        return map
+        return Permission.values().map { permission ->
+            permission to sitePermissions.filter {
+                it.permissions[permission] == ALLOWED
+        }}.toMap()
     }
 
     /**
@@ -136,21 +120,7 @@ class SitePermissionsStorage(
             }
     }
 
-    private fun MutableMap<Permission, MutableList<SitePermissions>>.putIfAllowed(
-        permission: Permission,
-        status: Status,
-        sitePermissions: SitePermissions
-    ) {
-        if (status == ALLOWED) {
-            if (this.containsKey(permission)) {
-                this[permission]?.add(sitePermissions)
-            } else {
-                this[permission] = mutableListOf(sitePermissions)
-            }
-        }
-    }
-
-    enum class Permission {
-        MICROPHONE, BLUETOOTH, CAMERA, LOCAL_STORAGE, NOTIFICATION, LOCATION
+    enum class Permission(val id: Int) {
+        MICROPHONE(0), BLUETOOTH(1), CAMERA(2), LOCAL_STORAGE(3), NOTIFICATION(4), LOCATION(5);
     }
 }
