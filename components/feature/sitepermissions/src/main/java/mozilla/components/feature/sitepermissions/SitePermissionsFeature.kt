@@ -13,33 +13,15 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import mozilla.components.browser.session.SelectionAwareSessionObserver
-import mozilla.components.browser.session.Session
-import mozilla.components.browser.session.SessionManager
-import mozilla.components.browser.session.runWithSession
-import mozilla.components.browser.session.runWithSessionIdOrSelected
+import kotlinx.coroutines.*
+import mozilla.components.browser.session.*
 import mozilla.components.concept.engine.permission.Permission
-import mozilla.components.concept.engine.permission.Permission.ContentAudioCapture
-import mozilla.components.concept.engine.permission.Permission.ContentAudioMicrophone
-import mozilla.components.concept.engine.permission.Permission.ContentGeoLocation
-import mozilla.components.concept.engine.permission.Permission.ContentNotification
-import mozilla.components.concept.engine.permission.Permission.ContentVideoCamera
-import mozilla.components.concept.engine.permission.Permission.ContentVideoCapture
+import mozilla.components.concept.engine.permission.Permission.*
 import mozilla.components.concept.engine.permission.PermissionRequest
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.BLOCKED
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature.DialogConfig
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
-import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.*
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.base.feature.PermissionsFeature
@@ -287,13 +269,13 @@ class SitePermissionsFeature(
                     permissionFromStore[LOCATION].doNotAskAgain()
                 }
                 is ContentNotification -> {
-                    permissionFromStore.notification.doNotAskAgain()
+                    permissionFromStore[NOTIFICATION].doNotAskAgain()
                 }
                 is ContentAudioCapture, is ContentAudioMicrophone -> {
-                    permissionFromStore.microphone.doNotAskAgain()
+                    permissionFromStore[MICROPHONE].doNotAskAgain()
                 }
                 is ContentVideoCamera, is ContentVideoCapture -> {
-                    permissionFromStore.camera.doNotAskAgain()
+                    permissionFromStore[CAMERA].doNotAskAgain()
                 }
                 else -> false
             }
@@ -320,22 +302,24 @@ class SitePermissionsFeature(
         permission: Permission,
         sitePermissions: SitePermissions
     ): SitePermissions {
-        return when (permission) {
+        val newPermissions = sitePermissions.permissions.toMutableList()
+        when (permission) {
             is ContentGeoLocation -> {
-                sitePermissions.copy(location = status)
+                newPermissions[LOCATION.id] = status
             }
             is ContentNotification -> {
-                sitePermissions.copy(notification = status)
+                newPermissions[NOTIFICATION.id] = status
             }
             is ContentAudioCapture, is ContentAudioMicrophone -> {
-                sitePermissions.copy(microphone = status)
+                newPermissions[MICROPHONE.id] = status
             }
             is ContentVideoCamera, is ContentVideoCapture -> {
-                sitePermissions.copy(camera = status)
+                newPermissions[CAMERA.id] = status
             }
             else ->
                 throw InvalidParameterException("$permission is not a valid permission.")
         }
+        return sitePermissions.copy(permissions = newPermissions)
     }
 
     private fun createPrompt(
@@ -548,16 +532,16 @@ private fun isPermissionGranted(
 ): Boolean {
     return when (permission) {
         is ContentGeoLocation -> {
-            permissionFromStorage[].isAllowed()
+            permissionFromStorage[LOCATION].isAllowed()
         }
         is ContentNotification -> {
-            permissionFromStorage.notification.isAllowed()
+            permissionFromStorage[NOTIFICATION].isAllowed()
         }
         is ContentAudioCapture, is ContentAudioMicrophone -> {
-            permissionFromStorage.microphone.isAllowed()
+            permissionFromStorage[MICROPHONE].isAllowed()
         }
         is ContentVideoCamera, is ContentVideoCapture -> {
-            permissionFromStorage.camera.isAllowed()
+            permissionFromStorage[CAMERA].isAllowed()
         }
         else ->
             throw InvalidParameterException("$permission is not a valid permission.")
