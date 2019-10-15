@@ -302,24 +302,26 @@ class SitePermissionsFeature(
         permission: Permission,
         sitePermissions: SitePermissions
     ): SitePermissions {
-        val newPermissions = sitePermissions.permissions.toMutableList()
-        when (permission) {
-            is ContentGeoLocation -> {
-                newPermissions[LOCATION.id] = status
-            }
-            is ContentNotification -> {
-                newPermissions[NOTIFICATION.id] = status
-            }
-            is ContentAudioCapture, is ContentAudioMicrophone -> {
-                newPermissions[MICROPHONE.id] = status
-            }
-            is ContentVideoCamera, is ContentVideoCapture -> {
-                newPermissions[CAMERA.id] = status
-            }
-            else ->
-                throw InvalidParameterException("$permission is not a valid permission.")
-        }
-        return sitePermissions.copy(permissions = newPermissions)
+        return sitePermissions.copy(
+            permissions =
+                mapOf(
+                    when (permission) {
+                        is ContentGeoLocation -> {
+                            LOCATION
+                        }
+                        is ContentNotification -> {
+                            NOTIFICATION
+                        }
+                        is ContentAudioCapture, is ContentAudioMicrophone -> {
+                            MICROPHONE
+                        }
+                        is ContentVideoCamera, is ContentVideoCapture -> {
+                            CAMERA
+                        }
+                        else ->
+                            throw InvalidParameterException("$permission is not a valid permission.")
+                    }
+                to status))
     }
 
     private fun createPrompt(

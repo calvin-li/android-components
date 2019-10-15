@@ -21,7 +21,7 @@ import mozilla.components.feature.sitepermissions.db.StatusConverter
  */
 data class SitePermissions(
     val origin: String,
-    val permissions: Map<Permission, Status> = Permission.values().map { it to NO_DECISION }.toMap(),
+    val permissions: Map<Permission, Status> = emptyMap(),
     val savedAt: Long
 ) : Parcelable {
 
@@ -51,8 +51,8 @@ data class SitePermissions(
             requireNotNull(parcel.createIntArray()).zip(requireNotNull(parcel.createIntArray()))
                 .map {(permission, status) ->
                     requireNotNull(Permission.values().find { it.id == permission }) to
-                        requireNotNull(converter.toStatus(status))}
-                .toMap(),
+                    requireNotNull(converter.toStatus(status))
+                }.toMap(),
             parcel.readLong()
         )
 
