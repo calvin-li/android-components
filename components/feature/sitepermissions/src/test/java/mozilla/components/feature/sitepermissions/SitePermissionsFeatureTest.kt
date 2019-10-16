@@ -26,6 +26,10 @@ import mozilla.components.concept.engine.permission.PermissionRequest
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.BLOCKED
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
 import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.base.observer.Consumable
 import mozilla.components.support.test.any
@@ -369,7 +373,7 @@ class SitePermissionsFeatureTest {
 
         doReturn(permissionList).`when`(request).permissions
         doReturn(sitePermissionFromStorage).`when`(mockStorage).findSitePermissionsBy(anyString())
-        doReturn(ALLOWED).`when`(sitePermissionFromStorage).location
+        doReturn(ALLOWED).`when`(sitePermissionFromStorage)[SitePermissionsStorage.Permission.LOCATION]
         doReturn(mockConsumable).`when`(mockSession).contentPermissionRequest
         doReturn(true).`when`(mockConsumable).consume { true }
 
@@ -467,10 +471,10 @@ class SitePermissionsFeatureTest {
 
             doReturn(listOf(permission)).`when`(request).permissions
             doReturn(sitePermissionFromStorage).`when`(mockStorage).findSitePermissionsBy(anyString())
-            doReturn(BLOCKED).`when`(sitePermissionFromStorage).location
-            doReturn(BLOCKED).`when`(sitePermissionFromStorage).notification
-            doReturn(BLOCKED).`when`(sitePermissionFromStorage).camera
-            doReturn(BLOCKED).`when`(sitePermissionFromStorage).microphone
+            doReturn(BLOCKED).`when`(sitePermissionFromStorage)[LOCATION]
+            doReturn(BLOCKED).`when`(sitePermissionFromStorage)[NOTIFICATION]
+            doReturn(BLOCKED).`when`(sitePermissionFromStorage)[CAMERA]
+            doReturn(BLOCKED).`when`(sitePermissionFromStorage)[MICROPHONE]
 
             try {
                 val isAllowed = sitePermissionFromStorage.isGranted(request)

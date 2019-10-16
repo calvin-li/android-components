@@ -122,7 +122,7 @@ class SitePermissionsStorageTest {
     private fun createNewSitePermission(): SitePermissions {
         return SitePermissions(
             origin = "mozilla.dev",
-            permissionsMap = mapOf(
+            permissions = mapOf(
             LOCAL_STORAGE to ALLOWED,
             LOCATION to BLOCKED,
             NOTIFICATION to NO_DECISION,

@@ -45,13 +45,13 @@ class SitePermissionEntityTest {
     fun `convert from domain class to db entity`() {
         val domainClass = SitePermissions(
             origin = "mozilla.dev",
-                permissionsMap = mapOf(
-            Permission.LOCAL_STORAGE to ALLOWED,
-            Permission.LOCATION to BLOCKED,
-            Permission.NOTIFICATION to NO_DECISION,
-            Permission.MICROPHONE to NO_DECISION,
-            Permission.CAMERA to NO_DECISION,
-            Permission.BLUETOOTH to ALLOWED),
+            permissions = mapOf(
+                Permission.LOCAL_STORAGE to ALLOWED,
+                Permission.LOCATION to BLOCKED,
+                Permission.NOTIFICATION to NO_DECISION,
+                Permission.MICROPHONE to NO_DECISION,
+                Permission.CAMERA to NO_DECISION,
+                Permission.BLUETOOTH to ALLOWED),
             savedAt = 0
         )
 
