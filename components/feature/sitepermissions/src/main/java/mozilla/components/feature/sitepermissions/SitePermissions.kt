@@ -8,6 +8,13 @@ import android.os.Parcel
 import android.os.Parcelable
 import mozilla.components.feature.sitepermissions.SitePermissions.Status.NO_DECISION
 import mozilla.components.feature.sitepermissions.db.StatusConverter
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.BLUETOOTH
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.CAMERA
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.MICROPHONE
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.NOTIFICATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCATION
+import mozilla.components.feature.sitepermissions.SitePermissionsStorage.Permission.LOCAL_STORAGE
 
 /**
  * A site permissions and its state.
@@ -63,6 +70,21 @@ data class SitePermissions(
 
     override fun describeContents(): Int {
         return 0
+    }
+
+
+    /**
+     * Gets the current status for a [Permission] type
+     */
+    operator fun get(permissionType: Permission): Status {
+        return when (permissionType) {
+            MICROPHONE -> microphone
+            BLUETOOTH -> bluetooth
+            CAMERA -> camera
+            LOCAL_STORAGE -> localStorage
+            NOTIFICATION -> notification
+            LOCATION -> location
+        }
     }
 
     companion object CREATOR : Parcelable.Creator<SitePermissions> {
